@@ -10,7 +10,7 @@ metadata {
 		capability "Temperature Measurement"
         capability "Thermostat"
         capability "Relative Humidity Measurement"
-		//capability "Polling"
+		capability "Polling"
 		capability "Sensor"
         capability "Refresh"
         
@@ -127,10 +127,6 @@ metadata {
 	}
 }
 
-//def updated() {
-//    runEvery1Minute("runMeAgain")
-//}
-
 // parse events into attributes
 def parse(String description) {
 	log.debug "parse('${description}')"
@@ -139,16 +135,16 @@ def parse(String description) {
 // Implementation of capability.refresh
 def refresh() {
     log.debug "refresh()"
-    runMeAgain()
+    poll()
 }
 
 // Implementation of capability.polling
-def runMeAgain() {
-	log.debug "runMeAgain()"
-	def data = parent.getThermostatDataFromNexia(this)
+def poll() {
+	log.debug "poll()"
+	def data = parent.pollChild(this)
 
 	if(data) {
-    	sendEvent(name: "temperature", value: data.temperature, unit: "F", isStateChange: true)
+    	sendEvent(name: "temperature", value: data.temperature, unit: "F")
         sendEvent(name: "heatingSetpoint", value: data.heatingSetpoint, unit: "F")
         sendEvent(name: "coolingSetpoint", value: data.coolingSetpoint, unit: "F")
         sendEvent(name: "thermostatSetpoint", value: data.thermostatSetpoint, unit: "F")
@@ -157,7 +153,7 @@ def runMeAgain() {
         sendEvent(name: "thermostatOperatingState", value: data.thermostatOperatingState)
         sendEvent(name: "humidity", value: data.humidity, unit: "%")
         sendEvent(name: "activeMode", value: data.activeMode)
-        sendEvent(name: "outdoorTemperature", value: data.outdoorTemperature, unit: "F", isStateChange: true)
+        sendEvent(name: "outdoorTemperature", value: data.outdoorTemperature, unit: "F")
 	} else {
     	log.error "ERROR: Device connection removed? No data found for ${device.deviceNetworkId} after polling"
     }
